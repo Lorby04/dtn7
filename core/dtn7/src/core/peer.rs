@@ -1,6 +1,7 @@
 use crate::cla::{ClaSenderTask, ConvergenceLayerAgent};
 use crate::{CLAS, CONFIG};
 use bp7::EndpointID;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -155,13 +156,28 @@ impl DtnPeer {
     }
 
     pub fn first_cla(&self) -> Option<ClaSenderTask> {
+        debug!(
+            "Looking for CLA for peer {} in list: {:?}",
+            self.eid, self.cla_list
+        );
         for cla in &self.cla_list {
             for cla_instance in &(*CLAS.lock()) {
+                debug!(
+                    "Checking CLA instance: {} for {}",
+                    cla_instance.name(),
+                    cla.0
+                );
                 if cla.0 == cla_instance.name() && cla_instance.accepting() {
                     let dest = format!(
                         "{}:{}",
                         self.addr,
                         cla.1.unwrap_or_else(|| cla_instance.port())
+                    );
+                    debug!(
+                        "Found matching CLA {} for peer {}, destination: {}",
+                        cla_instance.name(),
+                        self.eid,
+                        dest
                     );
                     return Some(ClaSenderTask {
                         tx: cla_instance.channel(),

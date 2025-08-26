@@ -3,6 +3,7 @@ use crate::cla::ecla::processing::scheduled_submission;
 use crate::cla::{ClaCmd, HelpStr};
 use async_trait::async_trait;
 use dtn7_codegen::cla;
+use log::debug;
 use std::collections::HashMap;
 use std::str::FromStr;
 use tokio::sync::mpsc;
@@ -82,6 +83,10 @@ impl ConvergenceLayerAgent for ExternalConvergenceLayer {
         self.tx.clone()
     }
     fn accepting(&self) -> bool {
+        debug!(
+            "ECLA accepting called, !discovery_only={}",
+            !self.discovery_only
+        );
         !self.discovery_only
     }
 }
