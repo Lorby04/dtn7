@@ -4,8 +4,9 @@ use crate::{RoutingNotifcation, CONFIG, PEERS};
 
 use super::{RoutingAgent, RoutingCmd};
 use async_trait::async_trait;
+use bp7::EndpointID;
 use glob_match::glob_match;
-use log::{debug, info};
+use log::{debug, info, warn};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::Sender;
 
@@ -132,15 +133,25 @@ async fn handle_routing_cmd(mut rx: mpsc::Receiver<RoutingCmd>) {
                         && glob_match(&route.dst, &bp.destination.to_string())
                     {
                         debug!(
-                            "Found route: {}, looking for valid peer ({})",
-                            route, route.via
-                        );
+                            "Found route: {}, looking for valid peer ({}) in peer list [{:#?}]",
+                            route, route.via, 
+                            {
+                                let peers_guard = PEERS.lock();
+                                peers_guard.iter()
+                                    .map(|(s, p)| format!("{}:{} {:?}", s, p.eid, p.cla_list))
+                                    .collect::<Vec<_>>()
+                                    .join(", ")
+                            });
                         for (_, p) in (*PEERS.lock()).iter() {
+                            debug!("Peer eid: {:?}, via:{:?}", p.eid.to_string(), route.via);
                             if p.eid.to_string() == route.via {
                                 if let Some(cla) = p.first_cla() {
+                                    debug!("Found cla:{:?}",cla);
                                     clas.push(cla);
                                     delete_afterwards = !bp.destination.is_non_singleton();
                                     break 'route_loop;
+                                }else{
+                                    warn!("Failed to find cla for peer:{}",p.eid.to_string());
                                 }
                             }
                         }
