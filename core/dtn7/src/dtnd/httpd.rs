@@ -1,3 +1,4 @@
+use crate::auto_peers_remove;
 use crate::core::application_agent::ApplicationAgent;
 use crate::core::application_agent::SimpleApplicationAgent;
 use crate::core::bundlepack::Constraint;
@@ -8,7 +9,6 @@ use crate::core::helpers::rnd_peer;
 use crate::core::peer::PeerType;
 use crate::core::store::BundleStore;
 use crate::peers_add;
-use crate::auto_peers_remove;
 use crate::routing_cmd;
 use crate::routing_get_data;
 use crate::store_remove;

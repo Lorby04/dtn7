@@ -206,4 +206,17 @@ impl DtnPeer {
     pub fn failed_too_much(&self) -> bool {
         self.fails > 3
     }
+
+    pub fn merge(&mut self, other: &Self) {
+        if self.eid != other.eid {
+            return;
+        }
+        self.addr = other.addr.clone();
+        if other.con_type == PeerType::Static {
+            self.con_type = other.con_type;
+        }
+        if !other.cla_list.is_empty() {
+            let _ = std::mem::replace(&mut self.cla_list, other.cla_list.clone());
+        }
+    }
 }

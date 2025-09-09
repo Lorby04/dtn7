@@ -107,19 +107,30 @@ pub fn get_sequence(destination: &str) -> u32 {
 /// adds a new peer to the DTN core
 /// return true if peer was seen first time
 /// return false if peer was already known
-pub fn peers_add(peer: DtnPeer) -> bool {
+pub fn peers_add(mut peer: DtnPeer) -> bool {
+    let mut new = false;
     (*PEERS.lock())
-        .insert(peer.eid.node().unwrap(), peer)
-        .is_none()
+        .entry(peer.eid.node().unwrap())
+        .and_modify(|p| {
+            p.merge(&peer);
+            p.touch();
+        })
+        .or_insert_with(|| {
+            new = true;
+            peer.touch();
+            peer
+        });
+
+    new
 }
 
 pub fn auto_peers_remove(peer_id: &str) {
     let mut lock = PEERS.lock();
     let peers = &mut *lock;
-    if let Some(peer) = peers.get(peer_id){
-        if matches!(peer.con_type, PeerType::Static){
+    if let Some(peer) = peers.get(peer_id) {
+        if matches!(peer.con_type, PeerType::Static) {
             warn!("The peer {peer_id} being removed is static peer, ignore");
-        }else{
+        } else {
             info!("The peer {peer_id} is dynamic peer, request to remove:{peer:#?}");
             peers.remove(peer_id);
         }
