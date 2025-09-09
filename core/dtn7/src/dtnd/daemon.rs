@@ -127,7 +127,8 @@ pub async fn start_dtnd(cfg: DtnConfig) -> anyhow::Result<()> {
 
     for s in &CONFIG.lock().statics {
         info!(
-            "Adding static peer: {}://{}/{}",
+            "Adding static({:#?}) peer: {}://{}/{}",
+            s.con_type,
             s.cla_list[0].0,
             s.addr,
             s.eid.node().unwrap()

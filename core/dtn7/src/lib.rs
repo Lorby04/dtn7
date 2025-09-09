@@ -9,12 +9,12 @@ pub mod routing;
 use crate::cla::CLAsAvailable;
 use crate::core::bundlepack::BundlePack;
 use crate::core::store::{BundleStore, InMemoryBundleStore};
-use crate::core::DtnStatistics;
+use crate::core::{DtnStatistics, PeerType};
 use crate::routing::{RoutingAgent, RoutingCmd};
 use bp7::{Bundle, EndpointID};
 use cla::{CLAEnum, ClaSenderTask};
 pub use dtnconfig::DtnConfig;
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 
 pub use crate::core::{DtnCore, DtnPeer};
 pub use crate::routing::RoutingNotifcation;
@@ -113,8 +113,17 @@ pub fn peers_add(peer: DtnPeer) -> bool {
         .is_none()
 }
 
-pub fn peers_remove(peer_id: &str) {
-    (*PEERS.lock()).remove(peer_id);
+pub fn auto_peers_remove(peer_id: &str) {
+    let mut lock = PEERS.lock();
+    let peers = &mut *lock;
+    if let Some(peer) = peers.get(peer_id){
+        if matches!(peer.con_type, PeerType::Static){
+            warn!("The peer {peer_id} being removed is static peer, ignore");
+        }else{
+            info!("The peer {peer_id} is dynamic peer, request to remove:{peer:#?}");
+            peers.remove(peer_id);
+        }
+    }
 }
 
 pub fn peers_count() -> usize {

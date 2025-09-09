@@ -1,3 +1,4 @@
+use crate::auto_peers_remove;
 use crate::core::bundlepack::*;
 use crate::core::*;
 use crate::routing::RoutingNotifcation;
@@ -392,7 +393,7 @@ pub async fn forward(mut bp: BundlePack) -> Result<()> {
                     }
                     if let Some(peer) = failed_peer {
                         let peers_before = (*PEERS.lock()).len();
-                        (*PEERS.lock()).remove(&peer);
+                        auto_peers_remove(&peer);
                         let peers_after = (*PEERS.lock()).len();
                         debug!("Removing peer {} from list of neighbors due to too many failed transmissions ({}/{})", peer, peers_before, peers_after);
                     }

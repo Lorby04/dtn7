@@ -8,7 +8,7 @@ use crate::core::helpers::rnd_peer;
 use crate::core::peer::PeerType;
 use crate::core::store::BundleStore;
 use crate::peers_add;
-use crate::peers_remove;
+use crate::auto_peers_remove;
 use crate::routing_cmd;
 use crate::routing_get_data;
 use crate::store_remove;
@@ -401,7 +401,7 @@ async fn http_peers_delete(
         };
 
         // TODO: test with IPN
-        peers_remove(&peer.eid.node().unwrap());
+        auto_peers_remove(&peer.eid.node().unwrap());
 
         Ok("Removed peer".into())
     } else {
