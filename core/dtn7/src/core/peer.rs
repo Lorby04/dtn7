@@ -211,8 +211,8 @@ impl DtnPeer {
         if self.eid != other.eid {
             return;
         }
-        self.addr = other.addr.clone();
-        if other.con_type == PeerType::Static {
+        if self.con_type != PeerType::Static{
+            self.addr = other.addr.clone();
             self.con_type = other.con_type;
         }
         if !other.cla_list.is_empty() {
