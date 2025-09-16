@@ -4,7 +4,6 @@ use crate::{RoutingNotifcation, CONFIG, PEERS};
 
 use super::{RoutingAgent, RoutingCmd};
 use async_trait::async_trait;
-use bp7::EndpointID;
 use glob_match::glob_match;
 use log::{debug, info, warn};
 use tokio::sync::mpsc;
